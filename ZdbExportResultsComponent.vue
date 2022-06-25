@@ -16,7 +16,7 @@
                     <div class="col-8">
                         <h5>Сегменты замера</h5>
                         <ul id="width_segments">
-                            <li v-for="item in items" :key="item.message">
+                            <li v-for="item in segmentItems" :key="item.message">
                                 {{ item.message }}
                             </li>
                         </ul>
@@ -172,19 +172,6 @@ import * as appFunctions from "../../plugins/function";
 import LoadingMixin from "../../mixins/loading";
 import { DateTime as LuxonDateTime } from 'luxon';
 
-var example1 = new Vue({
-    el: '#width_segments',
-    data: {
-        items: [
-            { message: '14-17' },
-            { message: '17-24' },
-            { message: '24-35' },
-            { message: '35-44' },
-        ]
-    }
-})
-
-
 export default {
     props: {
         item: {
@@ -201,6 +188,12 @@ export default {
     data: function () {
         return {
             items: {},
+            segmentItems: [
+              { message: '14-17' },
+              { message: '17-24' },
+              { message: '24-35' },
+              { message: '35-44' },
+            ],
             resultsCount: null,
             loadingCount: null,
             dateType: 'range',
@@ -233,6 +226,7 @@ export default {
         this.filter.dateRange.endDate = this.item.lastPeriod.date_stop;
 
         this.loadExports();
+        this.loadSegments();
     },
     methods: {
         prettyDate: function (date) {
@@ -252,8 +246,14 @@ export default {
             this.loadExports();
         },
         loadSegments: function () {
-
-
+          axios
+              .get('/api/zdb-measure-results-export')
+              .then(response => {
+                if (response && response.status === 200) {
+                  //TODO: поправить в зависимости от типа ответа
+                  this.segmentItems = response;
+                }
+              });
         },
         createExport: function () {
             this.creatingExport = true;
